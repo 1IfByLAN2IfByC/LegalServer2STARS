@@ -7,6 +7,7 @@ import logging.config
 
 class LSClient(object):
     def __init__(self, apikey, auth, permstore, log):
+        
         '''
         inputs:
         -------
