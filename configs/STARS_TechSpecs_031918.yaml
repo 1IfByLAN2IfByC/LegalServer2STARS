@@ -1,0 +1,476 @@
+swagger: '2.0'
+info:
+  version: '1.0.1'
+  title: STARS Data Endpoints
+  description: Information for data external API endpoints for record creation in STARS
+securityDefinitions:
+  VendorAPIAccess:
+    type: oauth2
+    #tokenUrl will be updated for the production environment; this is the QA environment.
+    tokenUrl: https://hhs-aclsmp-qa.entellitrak.com/etk-hhs-aclsmp-qa/auth/oauth/token
+    flow: application
+    scopes:
+      write: allows modifying resources
+security:
+  - VendorAPIAccess:
+    - write
+paths:
+  /api/endpoints/SHIPDataEntryEndpoints_QjJ0w8vJ/beneficiary_contact:
+    post:
+      summary: Beneficiary Contact Creation
+      description: Endpoints used to create a beneficiary contact record for a given user based on their eFile identifier
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Beneficiary Contact interaction object to be created."
+        required: true
+        schema:
+          $ref: "#/definitions/SHIP_Beneficiary_Contact"
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request - contents of data sent bad or otherwise incorrect
+        415:
+          description: Unsupported media type - wrong format or bad JSON format
+  /api/endpoints/SHIPDataEntryEndpoints_QjJ0w8vJ/media_outreach:
+    post:
+      summary: Media Outreach Creation
+      description: Endpoints used to create a media outreach record for a given user based on their eFile identifier
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Media interaction object to be created."
+        required: true
+        schema:
+          $ref: "#/definitions/SHIP_Media_Outreach"
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request - contents of data sent bad or otherwise incorrect
+        415:
+          description: Unsupported media type - wrong format or bad JSON format
+  /api/endpoints/SHIPDataEntryEndpoints_QjJ0w8vJ/group_outreach:
+    post:
+      summary: Group Outreach Creation
+      description: Endpoints used to a create group outreach record for a given user based on their eFile identifier
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Group interaction object to be created."
+        required: true
+        schema:
+          $ref: "#/definitions/SHIP_Group_Outreach"
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request - contents of data sent bad or otherwise incorrect
+        415:
+          description: Unsupported media type - wrong format or bad JSON format
+definitions:
+  SHIP_Media_Outreach:
+    type: object
+    required: [eFile,data]
+    properties:
+      eFile:
+        type: integer   
+        description: STARS eFile ID of the user submitting the interaction; eFile ID must be valid and cannot be locked for successful submission
+      data:
+        $ref: "#/definitions/SHIP_Media_Data"
+  SHIP_Media_Data: 
+    type: object
+    required: [countyOfEvent,intendedAudience,mippa,startDateOfActivity,stateOfEvent,targetBeneficiaryGroup,titleOfInteraction,topicsDiscussed,totalTimeSpent,typeOfMedia,zipCodeOfEvent]
+    properties:
+      sirsEfileId:
+        type: integer
+        description: Senior Medicare Patrol Information and Reporting System (SIRS) eFile ID of the user conducting the interaction; this field is required if sendToSirs is set to true. eFile ID must be valid and cannot be locked for successful submission. The SIRS eFile ID must be entered on the STARS Team Member profile
+      sendToSirs:
+        type: boolean
+        description: Radio button for determining if an interaction should be copied to SIRS; if send to SIRS is set to true, the relevant fields will be copied and used to simultaneously create a SIRS interaction. For this function to work the user must have active STARS and SIRS accounts and exisiting efile IDs for their SIRS account. The SIRS eFile ID must be entered on the STARS Team Member profile. Expected format true or false
+      countyOfEvent: 
+        type: integer
+        description: County of event; valid database ID expected
+      endDateOfActivity:
+        type: string
+        format: date
+        description: End date of interaction; Enforced format YYYY-MM-DD. Start date must come before the end date
+      estimatedNumberOfPeopleReached: 
+        type: integer
+        minimum: 1
+        maximum: 999999999
+        description: Estimated number of people reached by the interaction
+      geographicCoverage:
+        type: integer
+        description: Geographic coverage location; valid database ID expected
+      intendedAudience:
+        type: array
+        items:
+          type: string
+        description: Intended audience of interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      mediaContactEmail:
+        type: string
+        minLength: 5
+        maxLength: 255
+        description: E-mail of interaction contact; enforced format x@x.x
+      mediaContactFirstName: 
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: First name of interaction contact; valid values include a-z A-Z ,.'-
+      mediaContactLastName: 
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: Last name of interaction contact; valid values include a-z A-Z ,.'-
+      mediaContactPhoneNumber:
+        type: string
+        minLength: 12
+        maxLength: 12
+        description: Phone number of interaction contact. Enforced format xxx-xxx-xxxx
+      mippa:
+        type: boolean
+        description: MIPPA radio button that determines if an interaction is MIPPA related. Expected format true or false
+      notes:
+        type: string
+        minLength: 1
+        maxLength: 1024
+        description: Notes associated with the interaction. All values accepted
+      startDateOfActivity:
+        type: string
+        format: date
+        description: Start date of interaction; start date must come before the end date. Future dates are not allowed. Accepts one day ahead of the current date. Enforced format YYYY-MM-DD
+      stateOfEvent:
+        type: integer
+        description: State location of the interaction; valid database ID expected
+      targetBeneficiaryGroup: 
+        type: array
+        items:
+          type: string
+        description: Target Beneficiary Group of interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      titleOfInteraction:
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: Title of the interaction. All values accepted
+      topicsDiscussed:
+        type: array
+        items:
+          type: string
+        description: Topics Discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      totalTimeSpent:
+        type: integer
+        minimum: 1
+        maximum: 999999999
+        description: Total time spent on the interaction(minutes)
+      typeOfMedia:
+        type: integer
+        description: Type of media conducted; valid database ID expected
+      zipCodeOfEvent:
+        type: string
+        minLength: 5
+        maxLength: 10
+        description: Zip code of interaction; enforced format XXXXX[-XXXX]
+  SHIP_Group_Outreach:
+    type: object
+    required: [eFile,data]
+    properties:
+      eFile:
+        type: integer   
+        description: SHIP eFile ID of the user submitting the interaction; eFile ID must be valid and cannot be locked for successful submission
+      data:
+        $ref: "#/definitions/SHIP_Group_Data"
+  SHIP_Group_Data:
+    type: object
+    required: [countyOfEvent,intendedAudience,mippa,numberOfAttendees,startDateOfActivity,stateOfEvent,targetBeneficiaryGroup,titleOfInteraction,topicsDiscussed, totalTimeSpent,typeOfEvent,zipCodeOfEvent]
+    properties:
+      sirsEfileID:
+        type: integer
+        description: Senior Medicare Patrol Information and Reporting System (SIRS) eFile ID of the user conducting the interaction; this field is required if sendToSirs is set to true. eFile ID must be valid and cannot be locked for successful submission. The SIRS eFile ID must be entered on the STARS Team Member profile
+      sendToSirs:
+        type: boolean
+        description: Radio button for determining if an interaction should be copied to SIRS; if send to SIRS if set to true, the relevant fields will be copied and used to simultaneously create a SIRS interaction. For this function to work the user must have active STARS and SIRS accounts and exisiting efile IDs for their SIRS account. This information must be accurate on the users STARS Team Member profile. Expected format true or false
+      countyOfEvent: 
+        type: integer
+        description: County of event; valid database ID expected
+      endDateOfActivity:
+        type: string
+        format: date
+        description: End date of interaction; Start date must come before the end date. Enforced format YYYY-MM-DD
+      eventContactEmail:
+        type: string
+        minLength: 5
+        maxLength: 255
+        description: E-mail of interaction contact; enforced format x@x.x
+      eventContactFirstName: 
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: First name of interaction contact; valid values include a-z A-Z ,.'-
+      eventContactLastName:
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: Last name of interaction contact; valid values include a-z A-Z ,.'-
+      eventContactPhoneNumber:
+        type: string
+        minLength: 12
+        maxLength: 12
+        description: Phone number of interaction contact; enforced format xxx-xxx-xxxx
+      intendedAudience:
+        type: array
+        items:
+          type: string
+        description: Intended audience of interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      mippa:
+        type: boolean
+        description: MIPPA radio button. It flags whether an interaction is MIPPA related. Enforced format true or false
+      notes:
+        type: string
+        minLength: 1
+        maxLength: 1024
+        description: Notes associated with the interaction. All values accepted
+      numberOfAttendees:
+        type: integer
+        minimum: 1
+        maximum: 999999999
+        description: Number of Attendees of the interaction
+      startDateOfActivity:
+        type: string
+        format: date
+        description: Start date of interaction; start date must come before the end date. Accepts one day ahead of the current date. Enforced format YYYY-MM-DD
+      stateOfEvent:
+        type: integer
+        description: State location of the interaction; valid database ID expected
+      targetBeneficiaryGroup: 
+        type: array
+        items:
+          type: string
+        description: Target Beneficiary Group of the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      titleOfInteraction:
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: Title of the interaction. All values accepted.
+      topicsDiscussed:
+        type: array
+        items:
+          type: string
+        description: Topics Discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      totalTimeSpent:
+        type: integer
+        minimum: 1
+        maximum: 999999999
+        description: Total time spent on the interaction(minutes)
+      typeOfEvent:
+        type: integer
+        description: Type of event conducted; valid database ID expected
+      zipCodeOfEvent:
+        type: string
+        minLength: 5
+        maxLength: 10
+        description: Zip code of interaction; enforced format XXXXX[-XXXX]    
+  SHIP_Beneficiary_Contact:
+    type: object
+    required: [eFile,data]
+    properties: 
+      eFile:
+        type: integer   
+        description: SHIP eFile ID of the user submitting the interaction; eFile ID must be valid and cannot be locked for successful submission
+      date:
+        $ref: "#/definitions/SHIP_Beneficiary_Data"
+  SHIP_Beneficiary_Data:
+    type: object
+    required: [beneficiaryAgeGroup, beneficiaryAssests, beneficiaryGender, beneficiaryMonthlyIncome, beneficiaryRace, countyOfBeneficiaryResidence, countyOfSessionLocation, dateOfContact, englishAsPrimaryLanguage, howDidBeneficiaryLearnAboutShip, methodOfContact, mippa, receivingOrApplyingForSocialSecurityDisabilityOrMedicareDisability, stateOfBeneficiaryResidence, stateOfSessionLocation, status, totalTimeSpent, zipCodeOfBeneficiaryResidence, zipCodeOfSessionLocation]
+    properties:
+      sirsEfileId:
+        type: integer
+        description: Senior Medicare Patrol Information and Reporting System (SIRS) eFile ID of the user conducting the interaction; this field is required if sendToSirs is set to true. eFile ID must be valid and cannot be locked for successful submission. The SIRS eFile ID must be entered on the STARS Team Member profile
+      sendToSirs:
+        type: boolean
+        description: Radio button for determining if an interaction should be copied to SIRS; if send to SIRS if set to true, the relevant fields will be copied and used to simultaneously create a SIRS interaction. For this function to work the user must have active STARS and SIRS accounts and exisiting efile IDs for their SIRS account. This information must be accurate on the users STARS Team Member profile. Expected format true or false
+      additionalTopicDetals:
+        type: array
+        items:
+          type: string
+        description: Additional Topic Details discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      beneficiaryAgeGroup:
+        type: integer
+        description: Beneficiary Age Group; valid database ID expected
+      beneficiaryAssets:
+        type: integer
+        description: Beneficiary Asset limit; valid database ID expected
+      beneficiaryEmail:
+        type: string
+        minLength: 5
+        maxLength: 255
+        description: E-mail of interaction beneficiary; enforced format x@x.x
+      beneficiaryFirstName: 
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: Last name of interaction beneficiary; valid values include a-z A-Z ,.'-
+      beneficiaryGender:
+        type: integer
+        description: Beneficiary Gender; valid database ID expected
+      beneficiaryLastName: 
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: Last name of interaction beneficiary; valid values include a-z A-Z ,.'-
+      beneficiaryMonthlyIncome:
+        type: integer
+        description: Beneficiary Monthly Income; valid database ID expected
+      beneficiaryPhoneNumber:
+        type: string
+        minLength: 12
+        maxLength: 12
+        description: Phone number of interaction beneficiary; enforced format xxx-xxx-xxxx
+      beneficiaryRace:
+        type: integer
+        description: Beneficiary Race; valid database ID expected
+      countyOfBeneficiaryResidence: 
+        type: integer
+        description: County of Beneficiary Residence; valid database ID expected 
+      countyOfSessionLocation:
+        type: integer
+        description: County of Session Location; valid database ID expected
+      dateOfContact:
+        type: string
+        format: date
+        description: Date of Contact; Start date must come before the end date. Accepts one day ahead of the current date. Enforced format YYYY-MM-DD
+      englishAsAPrimaryLanguage: 
+        type: boolean
+        description: English As A Primary Language yes or no radio button. It flags whether a beneficiary speaks English as a primary language
+      howDidBeneficiaryLearnAboutShip:
+        type: integer
+        description: How Did the Beneficiary Learn About SHIP; valid database ID expected
+      medicaid:
+        type: array
+        items:
+          type: string
+        description: Medicaid Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      medicareAdvantageMaAndMaPd:
+        type: array
+        items:
+          type: string
+        description: Medicare Advantage MA and MA/PD Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      medicarePartD:
+        type: array
+        items:
+          type: string
+        description: Medicare Part D Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      medigapAndMedicareSelect: 
+        type: array
+        items:
+          type: string
+        description: Medigap and Medicare Select Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      methodOfContact: 
+        type: integer 
+        description: Method of Contact; valid database ID expected
+      mippa: 
+        type: boolean 
+        description: MIPPA radio button. It flags whether an interaction is MIPPA related. Enforced format true or false
+      notes: 
+        type: string
+        minLength: 1
+        maxLength: 1024
+        description: Notes associated with the interaction. All values accepted
+      originalMedicarePartsAAndB: 
+        type: array
+        items:
+          type: string
+        description: Original Medicare Parts A and B Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      otherInsurance: 
+        type: array
+        items:
+          type: string
+        description: Other Insurance Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      otherPrescriptionAssistance: 
+        type: array
+        items:
+          type: string
+        description: Other Prescription Assistance Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      partDLowIncomeSubsidyLisAndExtraHelp: 
+        type: array
+        items:
+          type: string
+        description: Part D Low Income Subsidy and LIS/Extra Help Topic discussed during the interaction; valid database ID expected. This field is a multiselect, multiple database IDs can be entered as csv
+        example: ["1", "2", "3"]
+      receivingOrApplyingForSocialSecurityDisabilityOrMedicareDisability:  
+        type: boolean 
+        description: Receiving or Applying for Social Security Disability or Medicare Disability radio button. Expected format true or false
+      representativeEmail: 
+        type: string
+        minLength: 5
+        maxLength: 255
+        description: E-mail of representative; enforced format x@x.x
+      representativeFirstName: 
+        minLength: 1
+        maxLength: 255
+        description: First name of representative; valid values include a-z A-Z ,.'-
+      representativeLastName: 
+        type: string
+        minLength: 1
+        maxLength: 255
+        description: Last name of representative; valid values include a-z A-Z ,.'-
+      representativePhoneNumber: 
+        type: string
+        minLength: 12
+        maxLength: 12
+        description: Phone number of representative; enforced format xxx-xxx-xxxx
+      stateOfBeneficiaryResidence: 
+        type: integer 
+        description: State location of beneficiary residence; valid database ID expected
+      stateOfSessionLocation: 
+        type: integer 
+        description: State location of session; valid database ID expected
+      status: 
+        type: integer 
+        format: database ID
+        description: Status of the interaction; valid database ID expected
+      totalTimeSpent: 
+        minimum: 1
+        maximum: 999999999
+        description: Total time spent on the interaction(minutes)
+      zipCodeOfBeneficiaryResidence: 
+        type: string
+        minLength: 5
+        maxLength: 10
+        description: Zip code of beneficiary residence; enforced format XXXXX[-XXXX]
+      zipCodeOfSessionLocation: 
+        type: string
+        minLength: 5
+        maxLength: 10
+        description: Zip code of session location; enforced format XXXXX[-XXXX]
+#As with tokenUrl, host will change for production.
+host: hhs-aclsmp-qa.entellitrak.com/etk-hhs-aclsmp-qa/
+schemes:
+ - https
