@@ -1,0 +1,33 @@
+
+{
+    "_id": "mongodb id", // db id
+    "caseid": "int", // LS case id
+    "LShistory": [
+        {
+            "timestamppulled": "time",  // time pulled from LS 
+            "hash": "hash", // hashed value of record
+            "record": {} // record from LS 
+        }
+        // new one if record is updated 
+        // {
+        //     "timestamppulled": "time",  // time pulled from LS 
+        //     "hash": "hash", // hashed value of record
+        //     "record": {} // record from LS 
+        // }  
+    ],
+
+    "STARShistory": [
+        {
+            "submissionid": "int", // unique id generated for each sub
+            "timestamp": "time", // time submitted
+            "returncode": "string" // response code from STARS server
+        }
+        // one for every time the record is updated
+        // {
+        //     "submissionid": "int", // unique id generated for each sub
+        //     "timestamp": "time", // time submitted
+        //     "returncode": "string" // response code from STARS server
+        // }
+    ],
+    "lastsubmissionsucess": "bool" // True/False if LAST submission was valid
+}

@@ -1,0 +1,13 @@
+// ----------------------------------------------------------------------------
+// schema for the STARS submission history, which will keep a detailed
+// log of all submissions to STARS
+// STARS.db
+{
+    "_id": "mongodb id", // unique id for each submission
+    "timestamp": "time", // time of upload
+    "record": {}, // STARS-complient record to be uploaded
+    "response": "string", // response code from STARS server
+    "success": "bool" // True if this.response is 200
+}
+
+// ----------------------------------------------------------------------------
