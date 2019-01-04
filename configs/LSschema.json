@@ -21,7 +21,7 @@
         {
             "submissionid": "int", // unique id generated for each sub
             "timestamp": "time", // time submitted
-            "returncode": "string" // response code from STARS server
+            "response": "string" // response code from STARS server
         }
         // one for every time the record is updated
         // {
