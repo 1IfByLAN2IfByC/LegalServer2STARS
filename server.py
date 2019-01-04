@@ -9,6 +9,7 @@ import os
 import pprint
 import asyncio 
 from lsclient import LSClient
+import logging
 
 pollinterval = 100 # time between LS polls (ms)
 
@@ -16,22 +17,13 @@ class MainHandler(tornado.web.RequestHandler):
     async def get(self):
         db = self.settings['db']
 
-        await lsserver.startup()
+        await uploader.periodic_check()
 
-    async def periodic_check(self):
-        newvalues = False
-        while not newvalues:
-            uploader.
 
-        
 
 class Uploader(object):
-    def __init__(self, lsclient, queue):
+    def __init__(self, lsclient):
         self.lsclient = lsclient
-        self.queue = queue
-
-    async def startup(self):
-        await lsclient.startup()
 
     async def _check_new_LS(self):
         ''' connect to LS, check for new requests. will return
@@ -49,7 +41,6 @@ class Uploader(object):
         ''' take values from queue, translate them into STARS-complient 
             format, post to STARS, update LS ledger with confirmation code,
             and pop from queue
-
         '''
 
         pass
@@ -64,8 +55,18 @@ class Uploader(object):
         await self._upload_to_STARS()
         
 def main():
+    import tornado.web
+    import tornado.autoreload
+    from queuerunner import QueueRunner
+    from lsdatabasedriver import LSDBDriver
+    import motor 
+    tornado.autoreload.start()
+    default_path='configs/logconfig.json'
+    default_level=logging.INFO
+
     client = motor.motor_tornado.MotorClient('localhost', 27017)
     db = client.TLSC
+    col = db.LegalServer
 
     schema = 'configs/LSschema.json'
     dbdriver = LSDBDriver(db, schema)
@@ -78,11 +79,18 @@ def main():
 
     with open("/users/mikelee/Desktop/test.txt", 'r') as f:
         auth = [r.rstrip() for r in f]
+    
+    queue = QueueRunner(db.Queue, log)
+
+    with open("/users/mikelee/Desktop/test.txt", 'r') as f:
+        auth = [r.rstrip() for r in f]
         
-    lsserver = LSClient(auth[0], (auth[1], auth[2]), dbdriver, log)
+    lsclient = LSClient(auth[0], (auth[1], auth[2]), dbdriver, queue, log)
 
     print('startup')
 
+    global uploader
+    uploader = Uploader(lsclient)
 
     application = tornado.web.Application([
         (r'/', MainHandler)

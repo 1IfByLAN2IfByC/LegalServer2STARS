@@ -5,13 +5,6 @@ import logging
 from hashlib import sha224
 import asyncio 
 
-from jsmin import jsmin
-import logging.config
-from datetime import datetime as dt
-from pymongo import InsertOne, UpdateOne
-import motor
-from pymongo.errors import BulkWriteError
-
 from lsdatabasedriver import LSDBDriver
 
 class LSClient(object):
@@ -52,13 +45,9 @@ class LSClient(object):
         self.log = log
         self._queue = queue
     
-        self.reportids = []
         self.toupload = []
         self.newrecords = []
 
-    async def startup(self):
-        await self._id_check()
-        
     async def _id_check(self):
         ''' open the file where the permstore is and check if it is empty.
             run once on startup to minimize queries to the database'''
@@ -74,6 +63,13 @@ class LSClient(object):
         '''
         pull the report using requesets. authentication handled using http auth
         '''
+
+        try:
+            # if first time running, load ids from DB
+            self.reportids
+        except AttributeError:
+            await self._id_check()
+
         self.log.debug('Attempting to make request')
         datareturn = rq.get(self.apikey, auth=(self.auth[0], self.auth[1]))
 
@@ -172,6 +168,8 @@ def main():
     import tornado.web
     import tornado.autoreload
     from queuerunner import QueueRunner
+    from lsdatabasedriver import LSDBDriver
+    import motor 
     tornado.autoreload.start()
     default_path='configs/logconfig.json'
     default_level=logging.INFO
@@ -199,7 +197,6 @@ def main():
         async def get(self):
             db = self.settings['db']
 
-            await lsserver.startup()
             await lsserver.check_new()
 
             x = await db.fetch_all()
